@@ -1,0 +1,35 @@
+pipeline{
+    agent any
+    tools{
+        maven 'Maven'
+    }
+    stages{
+        stage('Build Maven project'){
+            steps{
+                echo 'Hello world'
+                echo 'Maven'
+                checkout([$class: 'GitSCM', branches: [[name: 'main']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/vachanabn/devops-sample']]])
+                echo 'checkout done'
+                dir('spring-boot-rest-example') {
+                    bat 'mvn clean install'
+                } 
+                           
+                
+            }
+        }
+         stage('Build Docker image'){
+             steps{
+                 dir('spring-boot-rest-example') {
+                    bat 'docker build -t vachanabn/spring-boot-rest-example .'
+                } 
+             }
+         }
+            stage('Push image to Docker hub'){
+             steps{
+                
+                    bat 'docker login -u vachanabn -p Smartme@5'
+                    bat 'docker push vachanabn/spring-boot-rest-example'
+             }
+         }
+    }
+}
